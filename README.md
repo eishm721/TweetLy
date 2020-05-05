@@ -1,4 +1,6 @@
-# TweetLy - a text prediction algorithm based of scraped Twitter history
+# TweetLy 
+
+This is a text prediction algorithm based of scraped Twitter history
 
 This is a Twitter prediction API that uses past tweet history to predict future user speech patterns. Has two modes, analyze and compare. Analyze reports a users tweeting patterns and other fun statistics. Compare takes in a sample of text and a list of 2 or more users and predicts which user is most likely to say that tweet based on a probabilistic model, along with a similarity index. All input handled through command line. Requires Twitter developer account with access keys.
 
