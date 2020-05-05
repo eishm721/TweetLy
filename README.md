@@ -1,4 +1,4 @@
-# TweetLy 
+# Tweet.Ly 
 
 This is a text prediction algorithm based off scraped Twitter history
 
