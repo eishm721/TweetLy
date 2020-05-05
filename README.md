@@ -15,4 +15,9 @@ Libraries Used:
 - Tweepy - handle twitter API and scraping
 - NumPy/SciPy - mathematical analysis with large data sets
 
+Set-Up:
+- Requires twitter developer account w/ consumer key & access token (https://developer.twitter.com/en)
+  - Replace Lines 18-21 in analyzetweets.py with developer account information
+- Run analyzetweets.py in commandline with specified parameters
+
 Current work is being done on developing a newer, simpler algorithm for computing log-similarities based off a similar framework and doing algorithmic analysis. Also working on improving efficiency.
