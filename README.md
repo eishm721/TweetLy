@@ -8,6 +8,8 @@ Framework is developed in Python using Tweepy API and twitter developer account.
 
 Features:
 - 2 modes of analyzing scraped data
+  - Analyze: Tweeting statistics and patterns for set of users
+  - Compare: apply text predictionl algorithm to predict future speech patterns for users
 - Reads up-to-date tweet data on each call for an automatically updating dataset
 - Set number of tweets to base models from
 
