@@ -20,7 +20,7 @@ Libraries Used:
 Set-Up:
 - Requires twitter developer account w/ consumer key & access token (https://developer.twitter.com/en)
   - Replace Lines 18-21 in analyzetweets.py with developer account information
-- Run analyzetweets.py in commandline with specified parameters
+- Run analyzetweets.py in command line with specified parameters
 
 Most Recent Changes (05/07/20):
 - Dramatic efficiency improvements - reduced tweet parsing from O(n^2) to O(n)
