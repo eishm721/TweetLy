@@ -4,7 +4,7 @@ This is a text prediction algorithm based off scraped Twitter history to predict
 
 This API has two modes, analyze and compare. Analyze reports a users tweeting patterns and other fun statistics. Compare takes in a sample of text and a list of 2 or more users and predicts which user is most likely to say that tweet based on a probabilistic model, along with a similarity index. All input handled through command line. Requires Twitter developer account with access keys.
 
-Framework is developed in Python using Tweepy API and twitter developer account. Initial steps were designing a scraping algorithm to process user tweets via Tweepy. Next steps were designing a probablistic modeling algorithm (NumPy/SciPy) using a Bayesian model and a multinomial random variable distribution to use a "Bag of Words" model.
+Framework is developed in Python using Tweepy API and twitter developer account. Initial steps were designing a scraping algorithm to process user tweets via Tweepy. Next steps were designing a probablistic modeling algorithm (NumPy/SciPy) using a Bayesian model and a multinomial random variable distribution to use a "Bag of Words" model. Simulations were run w/ 100,000 user tweets to test the accuracy of the model in many different categories.
 
 Features:
 - 2 modes of analyzing scraped data
@@ -22,4 +22,11 @@ Set-Up:
   - Replace Lines 18-21 in analyzetweets.py with developer account information
 - Run analyzetweets.py in commandline with specified parameters
 
-Current work is being done on developing a newer, simpler algorithm for computing log-similarities based off a similar framework and doing algorithmic analysis. Also working on improving efficiency.
+Most Recent Changes (05/07/20):
+- Dramatic efficiency improvements - reduced tweet parsing from O(n^2) to O(n)
+    - Improved efficiency of building dictionary by 2-fold
+- Ran simulations with 100,000 user tweets to determine accuracy of prediction algorithm in many different categories
+- Removed retweets from calculation
+- Optional parameter to limit number of tweets to parse (for lighter CPU loads)
+- Bug fixes
+
