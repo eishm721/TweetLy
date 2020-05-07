@@ -5,7 +5,14 @@
 
 
 class CleanTweet:
+    """
+    Class to process a tweet to remove undesirable words/phrases that do
+    not reflect speech patterns
+    """
     def __init__(self, tweet):
+        """
+        Initializes given text (tweet) to process
+        """
         self.text = tweet
 
     def process_word(self, word):
