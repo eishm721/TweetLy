@@ -13,7 +13,14 @@ import processTweet
 
 
 class UserSimilarity:
+    """
+    Class to compute user similarities to a given piece of text
+    """
+
     def __init__(self, user_frequencies, txt):
+        """
+        Initializes text data and user information
+        """
         self.text = txt
         self.all_user_freqs = user_frequencies
         self.all_user_probs = None
@@ -25,13 +32,13 @@ class UserSimilarity:
         of each word they used and its count and returns a probability map
         replacing counts with frequencies (out of total)
         """
-        user_prob_map = {}
+        user_prob_map = dict()
         for user in self.all_user_freqs:
             freq_map = self.all_user_freqs[user]
             total_words = sum(freq_map.values())
 
             # creates new dictionary with frequencies instead of counts
-            new_counts = {}
+            new_counts = dict()
             for word in freq_map:
                 new_counts[word] = freq_map[word] / total_words
             user_prob_map[user] = new_counts
@@ -43,7 +50,7 @@ class UserSimilarity:
         its frequency in the text, along with the number of total words
         """
         # creates cleaned string
-        word_counts = {}
+        word_counts = dict()
         cleaner = processTweet.CleanTweet(self.text)
         original_words = cleaner.process_string().split()
 

@@ -28,6 +28,7 @@ class UserProcessor:
     """
     Class for accessing/processing tweets for a set of entered twitter users
     """
+
     def __init__(self, users):
         """
         Initializes twitter client authentication with user information and extract info into api variable
@@ -36,7 +37,7 @@ class UserProcessor:
         self.users = users
         self.auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY)
         self.auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET_TOKEN)
-        self.api = tweepy.API(self.auth)
+        self.api = tweepy.API(self.auth, wait_on_rate_limit=True)
 
         # Set/up and verify authentication
         try:
@@ -64,20 +65,22 @@ class UserProcessor:
         timeline. By default, reads all tweets. Reads NUM_MAX tweets if parameter specified in header.
         """
         # create list of all tweets using user_timeline() method
-        word_freq = {}
+        word_freq = dict()
         tweets = [tweet.text for tweet in self.api.user_timeline(screen_name=user)]
 
         # processes each tweet
         num_to_analyze = NUM_MAX if NUM_MAX is not None else len(tweets)  # set num_tweets to read
         for i in range(num_to_analyze):
-            self.__process_tweet(word_freq, tweets[i])
+            # exclude all re-tweets
+            if tweets[i][:2] != 'RT':
+                self.__process_tweet(word_freq, tweets[i])
         return word_freq
 
     def create_freq(self):
         """
         Creates frequency dictionary with word counts for all users entered
         """
-        freq = {}
+        freq = dict()
         for user in self.users:
             freq[user] = self.process_user(user)
         return freq
@@ -129,7 +132,6 @@ class Output:
                     print("#" + str(index) + ":", word, word_count)
                     counter += 1
                 index += 1
-            print("Total Number of Retweets:", counts_list['rt'])
 
     def compare_users(self):
         """
@@ -179,9 +181,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
 
 
