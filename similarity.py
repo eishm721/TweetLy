@@ -101,9 +101,7 @@ class UserSimilarity:
             self.create_user_prob_map()
 
         # adds pair of user and its similarity
-        similarities = []
-        for user in self.all_user_probs:
-            similarities.append((user, self.__calc_log_similarity(user)))
+        similarities = [(user, self.__calc_log_similarity(user)) for user in self.all_user_probs]
         return sorted(similarities, key=lambda pair: pair[1], reverse=True)  # sorted reverse on similarity
 
     def most_similar_user(self):
