@@ -75,7 +75,6 @@ class UserProcessor:
         word_freq = dict()
         try:
             tweets = [tweet.text for tweet in self.api.user_timeline(screen_name=user) if tweet.text[:2] != 'RT']  # exclude all re-tweets
-            # tweets = [status.full_text for status in tweepy.Cursor(self.api.user_timeline, screen_name=user, tweet_mode="extended").items()]
 
             # processes each tweet
             num_to_analyze = NUM_MAX if NUM_MAX is not None else len(tweets)  # set num_tweets to read
