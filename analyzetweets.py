@@ -12,29 +12,37 @@
 import sys
 import tweepy
 import similarity
+import ml_algs
 import processTweet
+from authentication import *
 
-# Replace with Twitter developer information
-CONSUMER_KEY = ###
-CONSUMER_SECRET_KEY = ###
-ACCESS_TOKEN = ###
-ACCESS_SECRET_TOKEN = ###
+# Three options for the machine learning prediction algorithm to use
+#  - 'multi': Multinomial "Bag of words" RV model (standard)
+#  - 'naive': Naive Bayes model
+#  - 'log': Logistic Regression model
+PREDICTION_ALG = 'multi'
 
 VALID_COMMANDS = ['-analyze', '-compare']
+COMMON_WORDS_FILE = "word_files/common_words.txt"
 NUM_MAX = None   # specify max number of tweets to analyze per user, keep low to reduce runtime, None for no limit
+
+
+def quit_program(error_msg):
+    print(error_msg + "\n")
+    sys.exit()
 
 
 class UserProcessor:
     """
     Class for accessing/processing tweets for a set of entered twitter users
     """
-
     def __init__(self, users):
         """
         Initializes twitter client authentication with user information and extract info into api variable
         Verifies authentication and reports error if needed
         """
         self.users = users
+        self.tweet_cleaner = processTweet.CleanTweet()
         self.auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY)
         self.auth.set_access_token(ACCESS_TOKEN, ACCESS_SECRET_TOKEN)
         self.api = tweepy.API(self.auth, wait_on_rate_limit=True)
@@ -44,15 +52,14 @@ class UserProcessor:
             self.api.verify_credentials()
             print("Authentication OK\n")
         except:
-            print("Error during authentication\n")
-            sys.exit()
+            quit_program("Error during authentication")
 
     def __process_tweet(self, word_counts, tweet):
         """
         Takes in a given tweet and "cleans" it, removing URLs/handles and lowercases all
         text to standardized important phrases. Adds counts of each word to a total counts dictionary
         """
-        original_words = processTweet.CleanTweet(tweet).process_string().split()  # cleans original tweet & splits
+        original_words = self.tweet_cleaner.process_string(tweet).split()  # cleans original tweet & splits
         # standard dict count algorithm
         for word in original_words:
             if word not in word_counts:
@@ -66,25 +73,36 @@ class UserProcessor:
         """
         # create list of all tweets using user_timeline() method
         word_freq = dict()
-        tweets = [tweet.text for tweet in self.api.user_timeline(screen_name=user)]
+        try:
+            tweets = [tweet.text for tweet in self.api.user_timeline(screen_name=user) if tweet.text[:2] != 'RT']  # exclude all re-tweets
+            # tweets = [status.full_text for status in tweepy.Cursor(self.api.user_timeline, screen_name=user, tweet_mode="extended").items()]
 
-        # processes each tweet
-        num_to_analyze = NUM_MAX if NUM_MAX is not None else len(tweets)  # set num_tweets to read
-        for i in range(num_to_analyze):
-            # exclude all re-tweets
-            if tweets[i][:2] != 'RT':
+            # processes each tweet
+            num_to_analyze = NUM_MAX if NUM_MAX is not None else len(tweets)  # set num_tweets to read
+            for i in range(num_to_analyze):
                 self.__process_tweet(word_freq, tweets[i])
-        return word_freq
+            return word_freq, tweets
+        except:
+            quit_program("The username " + "@" + user + " is not a valid twitter handle")
+
+
+    def __process_all(self, index):
+        freq = dict()
+        for user in self.users:
+            freq[user] = self.process_user(user)[index]
+        return freq
 
     def create_freq(self):
         """
         Creates frequency dictionary with word counts for all users entered
         """
-        freq = dict()
-        for user in self.users:
-            freq[user] = self.process_user(user)
-        return freq
+        return self.__process_all(0)
 
+    def get_tweets(self):
+        """
+        Creates tweet dictionary mapping each user to an array of all their tweets
+        """
+        return self.__process_all(1)
 
 class Output:
     """
@@ -97,10 +115,13 @@ class Output:
         """
         self.command = command
         self.users = users  # list of users read in from command line
-        self.all_user_freqs = UserProcessor(self.users).create_freq()  # dict of all users w/ word counts
+        self.processor = UserProcessor(self.users)
         self.common_words = set()
 
-    def __read_common_words(self, filename="common_words.txt"):
+        self.all_user_freqs = self.processor.create_freq()  # dict of all users w/ word counts
+        self.all_user_tweets = self.processor.get_tweets()  # dict of all users & their tweets
+
+    def __read_common_words(self, filename=COMMON_WORDS_FILE):
         """
         Creates set of common prepositional phrases to be removed in processing (EX: the, and, or...)
         Reads in data from provided common_words.txt file by default but can be configured
@@ -133,11 +154,29 @@ class Output:
                     counter += 1
                 index += 1
 
+    def __predict_most_sim(self, text):
+        """
+        Given a text sample, applies the specified prediction algorithm
+        to predict which user is most likely to say the given text sample
+        """
+        if PREDICTION_ALG not in ['multi', 'naive', 'log']:
+            quit_program("Prediction algorithm specified must be one of 'bayes', 'naive', 'log' exactly")
+
+        if PREDICTION_ALG == 'multi':
+            # Calculate similarity using log-similarity functions in similarity.py file
+            sim = similarity.UserSimilarity(self.all_user_freqs, text)
+            most_sim = sim.most_similar_user()
+            print("\nText sample is most similar to:", "@" + most_sim)
+            sim.print_similarities()
+        else:
+            classifier = ml_algs.Classifier(self.all_user_tweets)
+            most_sim = classifier.predict_user(PREDICTION_ALG, text)
+            print("\nText sample is most similar to:", "@" + most_sim)
+
     def compare_users(self):
         """
         Given a set of users, prompts client to enter a piece of text and prints a prediction of
         which user is most likely to have that speech pattern. Loops until user specifies stop.
-        :return:
         """
         if len(self.users) < 2:
             raise ValueError
@@ -146,11 +185,7 @@ class Output:
             text = input("Enter the text to examine (enter exit() to stop): ")
             if text.strip().lower() == "exit()":
                 break
-            # Calculate similarity using log-similarity functions in similarity.py file
-            sim = similarity.UserSimilarity(self.all_user_freqs, text)
-            most_sim = sim.most_similar_user()
-            print("\nText sample is most similar to:", "@" + most_sim)
-            sim.print_similarities()
+            self.__predict_most_sim(text)
 
     def printTweet(self):
         """
@@ -172,8 +207,7 @@ def main():
     if len(args) > 1:
         # Extract command to perform, invalid if not -analyze or -compare
         if args[0] not in VALID_COMMANDS:
-            print("Command must be -analyze or -compare\n")
-            sys.exit()
+            quit_program("Command must be -analyze or -compare")
         users = args[1:]   # Extract users from command line
         output = Output(args[0], users)
         output.printTweet()
@@ -181,5 +215,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
