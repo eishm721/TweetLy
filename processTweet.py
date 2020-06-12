@@ -9,12 +9,6 @@ class CleanTweet:
     Class to process a tweet to remove undesirable words/phrases that do
     not reflect speech patterns
     """
-    def __init__(self, tweet):
-        """
-        Initializes given text (tweet) to process
-        """
-        self.text = tweet
-
     def process_word(self, word):
         """
         Takes in a specific word and "cleans" it, converting to lowercase, removing
@@ -38,13 +32,13 @@ class CleanTweet:
             last -= 1
         return curr_word[first:last + 1]
 
-    def process_string(self):
+    def process_string(self, text):
         """
-        Takes in a string and performs process_word operation in each word (separated with a space)
+        Takes in a text string and performs process_word operation in each word (separated with a space)
         in the string and returns a "cleaned", lowercase string.
         """
         cleaned = []
-        original_words = self.text.split()   # words separated w/ space
+        original_words = text.split()   # words separated w/ space
         for word in original_words:
             processed = self.process_word(word)
             # if valid cleaned word
