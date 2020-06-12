@@ -9,8 +9,6 @@
 
 
 import math
-import numpy as np
-import scipy as sci
 import processTweet
 
 
@@ -18,11 +16,11 @@ class UserSimilarity:
     """
     Class to compute user similarities to a given piece of text
     """
-
     def __init__(self, user_frequencies, txt):
         """
         Initializes text data and user information
         """
+        self.tweet_cleaner = processTweet.CleanTweet()
         self.text = txt
         self.all_user_freqs = user_frequencies
         self.all_user_probs = None
@@ -53,8 +51,7 @@ class UserSimilarity:
         """
         # creates cleaned string
         word_counts = dict()
-        cleaner = processTweet.CleanTweet(self.text)
-        original_words = cleaner.process_string().split()
+        original_words = self.tweet_cleaner.process_string(self.text).split()
 
         # creates counts map for cleaned string
         for word in original_words:
@@ -118,4 +115,3 @@ class UserSimilarity:
         low_bound = -1.5 * similarities[-1][1]  # logarithmic transformation constant - lowest similarity
         for user, log_sim in similarities:
             print(user, round(log_sim + low_bound, 3))
-
