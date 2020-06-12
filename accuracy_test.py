@@ -1,41 +1,31 @@
 # FILENAME: accuracy_test.py
 
-# Computes accuracy of log-similarity algorithm by comparing predicted user data
-# to the actual user who wrote a given tweet.
+# Accuracy of MULTINOMIAL RV algorithm.
+# Computes accuracy by comparing predicted user data to the actual user who wrote a given tweet.
 # Simulated over 100,000 trials for 96% overall accuracy across various categories
 
-# This file contains 3 sample categories with significant variation to test
+# Sample users in authentication.py
+
 
 import sys
 import tweepy
 import similarity
 import processTweet
-
-# Replace with Twitter developer information
-CONSUMER_KEY = ###
-CONSUMER_SECRET_KEY = ###
-ACCESS_TOKEN = ###
-ACCESS_SECRET_TOKEN = ###
-
-# Sampling criteria - famous (large number of tweets), have similar-minded people and difference (ex: left/right wing),
-# many different disciplines (politics, music, business, etc...)
-USERS = dict(politicians={"barackobama", "realdonaldtrump", "berniesanders", "speakerryan"},
-              musicians={"selenagomez", "kendricklamar", "danielcaesar", "drake"},
-              entrepreneurs={"billgates", "elonmusk", "jeffbezos"})
+from authentication import *
 
 
 class TestSim:
     """
     Class for testing accuracy of the model
     """
-
     def __init__(self, category):
         """
         Initializes twitter client authentication and sets-up data structures
         """
         self.users = USERS[category]
         self.user_counts = dict()  # maps each user to dictionary of word counts
-        self.user_tweets = dict()  # maps each user to list of their tweers
+        self.user_tweets = dict()  # maps each user to list of their tweets
+        self.tweet_cleaner = processTweet.CleanTweet()
 
         # Authentication
         self.auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET_KEY)
@@ -51,7 +41,7 @@ class TestSim:
         Takes in a given tweet and "cleans" it, removing URLs/handles and lowercases all
         text to standardized important phrases. Adds counts of each word to a total counts dictionary
         """
-        original_words = processTweet.CleanTweet(tweet).process_string().split()  # cleans original tweet & splits
+        original_words = self.tweet_cleaner.process_string(tweet).split()  # cleans original tweet & splits
         # standard dict count algorithm
         for word in original_words:
             if word not in word_counts:
@@ -65,6 +55,7 @@ class TestSim:
         """
         for user in self.users:
             # build dict of tweets
+            #tweets = [status.full_text for status in tweepy.Cursor(self.api.user_timeline, screen_name=user, tweet_mode="extended").items() if status.full_text[:2] != 'RT']
             tweets = [tweet.text for tweet in self.api.user_timeline(screen_name=user) if tweet.text[:2] != 'RT']
             self.user_tweets[user] = tweets
 
