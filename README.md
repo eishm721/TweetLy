@@ -28,6 +28,7 @@ Framework is developed in Python using Tweepy API and twitter developer account.
 ### Set-Up:
 - Requires twitter developer account w/ consumer key & access token (https://developer.twitter.com/en)
   - Replace lines 6-9 in authentication.py with developer account information
+  - Adjust lines 23 in analyzetweets.py to specify the ML classifier to use
 - Run analyzetweets.py in command line with specified parameters
     
 ### Most Recent Changes (06/12/20):
