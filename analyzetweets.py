@@ -28,6 +28,9 @@ NUM_MAX = None   # specify max number of tweets to analyze per user, keep low to
 
 
 def quit_program(error_msg):
+    """
+    Prints specified error message and exits the program
+    """
     print(error_msg + "\n")
     sys.exit()
 
